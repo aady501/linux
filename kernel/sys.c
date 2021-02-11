@@ -2692,3 +2692,12 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
+SYSCALL_DEFINE1(my_syscall, char *, msg)
+{
+	          char buf[256];
+		            long copied = strncpy_from_user(buf, msg, sizeof(buf));
+			              if (copied < 0 || copied == sizeof(buf))
+					                        return -EFAULT;
+				                printk(KERN_INFO "my_syscall called with \"%s\"\n", buf);
+						          return 0;
+}
