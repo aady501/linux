@@ -2692,12 +2692,32 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
-SYSCALL_DEFINE1(my_syscall, char *, msg)
+SYSCALL_DEFINE2(my_syscall, char *, msg, int, num)
 {
-	          char buf[256];
-		            long copied = strncpy_from_user(buf, msg, sizeof(buf));
-			              if (copied < 0 || copied == sizeof(buf))
-					                        return -EFAULT;
-				                printk(KERN_INFO "my_syscall called with \"%s\"\n", buf);
-						          return 0;
+		  if ((num>=1) && (num<=5)){
+		  char buf[256];
+		  int i=0;
+		  long copied = strncpy_from_user(buf, msg, sizeof(buf));
+		  if(copied<0){
+			printk(KERN_INFO "string greater than 256 characters\n");
+		  	return EINVAL;
+		  }
+		  while(copied>0){
+		  buf[i] = buf[i] + num;
+		  copied--;
+		  i++;
+		  }
+		  //while (*(msg) != '\0'){
+		  //	*(msg) = *(msg) + num;
+		//	printk(KERN_INFO "%c", msg[i]);
+		//	msg++;
+		//	i++;
+		  //}
+		  printk(KERN_INFO "%s\n", buf);
+		  return 0;
+		  }
+		  else{
+		  printk(KERN_INFO "Key out of range\n");
+		  return EINVAL;
+		  }
 }
