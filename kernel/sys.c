@@ -2697,39 +2697,33 @@ SYSCALL_DEFINE2(s2_encrypt, char *, msg, int, num)
 		  if ((num>=1) && (num<=5)){
 			  char *buf;
 			  long copied;
+			  int i=0;
 			  int len_str = strnlen_user(msg, 32767);
 			  printk("len of string:%d",len_str);
-			  printk(KERN_INFO "BEFORE KMALLOC");
-			  if ( ( buf = (char *)kmalloc(len_str+1, GFP_KERNEL) ) == NULL){
-				  printk("kmalloc failed");
+			  if ( ( buf = (char *)kmalloc(len_str, GFP_KERNEL) ) == NULL){
+				  printk(KERN_ERR "kmalloc failed");
 				  kfree(buf);
 				  return -EINVAL;			  
 			  }
-			  printk(KERN_INFO "AFTER KMALLOC");
-			  copied = strncpy_from_user(buf, msg, len_str+1);		  
-			  printk("String in buf:%s; copied variable: %ld",buf, copied);			  
+			  copied = strncpy_from_user(buf, msg, len_str);
 			  if(copied<0){
-				  printk(KERN_INFO "copy failed\n");
+				  printk(KERN_ERR "Copy failed using strncpy_from_user\n");
 				  kfree(buf);
 				  return -EINVAL;
 			  }
-			  printk(KERN_INFO "BEFORE MODIFY");
-			  while(*(buf)!='\0'){
+			  /* Move pointer to end of string
+			   * -1 is added as strnlen_user returns length with \0*/
+			  buf = buf + (len_str-1); 
+			  for (i=0;i<len_str-1;i++){
+				  buf--;
 				  *(buf) = *(buf) + num;
-				  printk(KERN_INFO "%c", *(buf) );
-				  buf++;
 			  }
-			  printk(KERN_INFO "AFTER add loop");
-//		  	  while(len_str>0){
-//			  len_str--;
-//			  buf--;
-//			  }	  
-//			  printk(KERN_INFO "%s\n", buf);
+			  printk("ENCRYPTED STRING: %s\n", buf);
 			  kfree(buf);
 			  return 0;
 		  }
 		  else{
-		  	printk(KERN_INFO "Key out of range\n");
+		  	printk(KERN_ERR "Key out of range, valid range(1-5): %d\n", num);
 		  	return -EINVAL;
 		  }
 }
