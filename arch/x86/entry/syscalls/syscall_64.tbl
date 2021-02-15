@@ -360,7 +360,7 @@
 437	common	openat2			sys_openat2
 438	common	pidfd_getfd		sys_pidfd_getfd
 439	common	faccessat2		sys_faccessat2
-440     common  my_syscall              sys_my_syscall
+440     common  s2_encrypt              sys_s2_encrypt
 
 #
 # x32-specific system call numbers start at 512 to avoid cache impact

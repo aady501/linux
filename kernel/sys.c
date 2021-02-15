@@ -2692,32 +2692,44 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
-SYSCALL_DEFINE2(my_syscall, char *, msg, int, num)
+SYSCALL_DEFINE2(s2_encrypt, char *, msg, int, num)
 {
 		  if ((num>=1) && (num<=5)){
-		  char buf[256];
-		  int i=0;
-		  long copied = strncpy_from_user(buf, msg, sizeof(buf));
-		  if(copied<0){
-			printk(KERN_INFO "string greater than 256 characters\n");
-		  	return EINVAL;
-		  }
-		  while(copied>0){
-		  buf[i] = buf[i] + num;
-		  copied--;
-		  i++;
-		  }
-		  //while (*(msg) != '\0'){
-		  //	*(msg) = *(msg) + num;
-		//	printk(KERN_INFO "%c", msg[i]);
-		//	msg++;
-		//	i++;
-		  //}
-		  printk(KERN_INFO "%s\n", buf);
-		  return 0;
+			  char *buf;
+			  long copied;
+			  int len_str = strnlen_user(msg, 32767);
+			  printk("len of string:%d",len_str);
+			  printk(KERN_INFO "BEFORE KMALLOC");
+			  if ( ( buf = (char *)kmalloc(len_str+1, GFP_KERNEL) ) == NULL){
+				  printk("kmalloc failed");
+				  kfree(buf);
+				  return -EINVAL;			  
+			  }
+			  printk(KERN_INFO "AFTER KMALLOC");
+			  copied = strncpy_from_user(buf, msg, len_str+1);		  
+			  printk("String in buf:%s; copied variable: %ld",buf, copied);			  
+			  if(copied<0){
+				  printk(KERN_INFO "copy failed\n");
+				  kfree(buf);
+				  return -EINVAL;
+			  }
+			  printk(KERN_INFO "BEFORE MODIFY");
+			  while(*(buf)!='\0'){
+				  *(buf) = *(buf) + num;
+				  printk(KERN_INFO "%c", *(buf) );
+				  buf++;
+			  }
+			  printk(KERN_INFO "AFTER add loop");
+//		  	  while(len_str>0){
+//			  len_str--;
+//			  buf--;
+//			  }	  
+//			  printk(KERN_INFO "%s\n", buf);
+			  kfree(buf);
+			  return 0;
 		  }
 		  else{
-		  printk(KERN_INFO "Key out of range\n");
-		  return EINVAL;
+		  	printk(KERN_INFO "Key out of range\n");
+		  	return -EINVAL;
 		  }
 }
