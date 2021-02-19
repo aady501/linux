@@ -8,13 +8,12 @@ SYSCALL_DEFINE2(s2_encrypt, char * , msg, int, num) {
     long copied;
     int i = 0;
     int len_str = strnlen_user(msg, 32767);
-    printk("len of string:%d", len_str);
-    if ((buf = (char * ) kmalloc(len_str, GFP_KERNEL)) == NULL) {
+    if ((buf = (char * ) kmalloc(len_str * sizeof (char), GFP_KERNEL)) == NULL) {
       printk(KERN_ERR "kmalloc failed");
       kfree(buf);
       return -EINVAL;
     }
-    copied = strncpy_from_user(buf, msg, len_str);
+    copied = strncpy_from_user(buf, msg, sizeof(buf));
     if (copied < 0) {
       printk(KERN_ERR "Copy failed using strncpy_from_user\n");
       kfree(buf);
@@ -24,7 +23,8 @@ SYSCALL_DEFINE2(s2_encrypt, char * , msg, int, num) {
      * -1 is added as strnlen_user returns length with \0*/
     buf = buf + (len_str - 1);
     for (i = 0; i < len_str - 1; i++) {
-      buf--;*(buf) = * (buf) + num;
+      buf--;
+      *(buf) = * (buf) + num;
     }
     printk("ENCRYPTED STRING: %s\n", buf);
     kfree(buf);
