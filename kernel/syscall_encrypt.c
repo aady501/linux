@@ -11,7 +11,7 @@ SYSCALL_DEFINE2(s2_encrypt, char * , msg, int, num) {
     if ((buf = (char * ) kmalloc(len_str * sizeof (char), GFP_KERNEL)) == NULL) {
       printk(KERN_ERR "kmalloc failed");
       kfree(buf);
-      return -EINVAL;
+      return -ENOMEM;
     }
     copied = strncpy_from_user(buf, msg, sizeof(buf));
     if (copied < 0) {
