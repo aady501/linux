@@ -19,14 +19,12 @@ SYSCALL_DEFINE2(s2_encrypt, char * , msg, int, num) {
       kfree(buf);
       return -EINVAL;
     }
-    /* Move pointer to end of string
-     * -1 is added as strnlen_user returns length with \0*/
-    buf = buf + (len_str - 1);
-    for (i = 0; i < len_str - 1; i++) {
-      buf--;
-      *(buf) = * (buf) + num;
+    printk("original string: %s\n", buf);
+    while(*(buf + i) != '\0' ){
+    	*(buf + i) = *(buf + i) + 1;
+	i++;
     }
-    printk("ENCRYPTED STRING: %s\n", buf);
+    printk("encrypted string: %s\n", buf);
     kfree(buf);
     return 0;
   } else {
