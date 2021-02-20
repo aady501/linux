@@ -21,7 +21,7 @@ SYSCALL_DEFINE2(s2_encrypt, char * , msg, int, num) {
     }
     printk("original string: %s\n", buf);
     while(*(buf + i) != '\0' ){
-	*(buf + i) = *(buf + i) + 1;
+	*(buf + i) = *(buf + i) + num;
 	i++;
     }
     printk("encrypted string: %s\n", buf);
